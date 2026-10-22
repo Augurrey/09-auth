@@ -1,6 +1,11 @@
 "use client";
 
-import { useEffect, type ReactNode, type MouseEvent } from "react";
+import {
+  useEffect,
+  useSyncExternalStore,
+  type ReactNode,
+  type MouseEvent,
+} from "react";
 import { createPortal } from "react-dom";
 import css from "./Modal.module.css";
 
@@ -34,7 +39,12 @@ export default function Modal({ children, onClose }: ModalProps) {
     }
   };
 
-  const modalRoot = document.getElementById("modal-root");
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+  const modalRoot = mounted ? document.getElementById("modal-root") : null;
 
   if (!modalRoot) {
     return null;

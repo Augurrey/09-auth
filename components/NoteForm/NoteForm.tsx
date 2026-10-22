@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import * as Yup from "yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
-import { createNote } from "@/lib/api";
-import type { CreateNoteData } from "@/lib/api";
+import { createNote } from "@/lib/api/clientApi";
+import type { CreateNoteData } from "@/lib/api/clientApi";
 import type { NoteTag } from "@/types/note";
 import useNoteStore from "@/lib/store/noteStore";
 
@@ -17,6 +17,7 @@ type FormErrors = Partial<Record<keyof CreateNoteData, string>>;
 
 const validationSchema = Yup.object({
   title: Yup.string()
+    .trim()
     .min(3, "Title must be at least 3 characters")
     .max(50, "Title must be at most 50 characters")
     .required("Title is required"),
@@ -80,9 +81,12 @@ export default function NoteForm() {
     },
   });
 
-  const formAction = async (formData: FormData) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (createMutation.isPending) return;
+    const formData = new FormData(event.currentTarget);
     const values: CreateNoteData = {
-      title: String(formData.get("title") ?? ""),
+      title: String(formData.get("title") ?? "").trim(),
       content: String(formData.get("content") ?? ""),
       tag: String(formData.get("tag") ?? "Todo") as NoteTag,
     };
@@ -120,7 +124,7 @@ export default function NoteForm() {
   return (
     <form
       className={css.form}
-      action={formAction}
+      onSubmit={handleSubmit}
       key={isHydrated ? "hydrated" : "loading"}
     >
       <div className={css.formGroup}>
