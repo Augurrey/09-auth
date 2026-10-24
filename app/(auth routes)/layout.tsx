@@ -1,25 +1,14 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { isAxiosError } from "axios";
-import { getMe } from "@/lib/api/serverApi";
-export default async function AuthLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  if ((await cookies()).has("accessToken")) {
-    let authenticated = false;
-    try {
-      await getMe();
-      authenticated = true;
-    } catch (error) {
-      if (
-        !isAxiosError(error) ||
-        ![401, 403].includes(error.response?.status ?? 0)
-      )
-        throw error;
-    }
-    if (authenticated) redirect("/profile");
-  }
-  return children;
+"use client";
+
+import { useEffect, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
+
+export default function AuthLayout({ children }: { children: ReactNode }) {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.refresh();
+  }, [router]);
+
+  return <>{children}</>;
 }
