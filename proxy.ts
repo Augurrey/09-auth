@@ -88,7 +88,7 @@ export async function proxy(request: NextRequest) {
         response.cookies.set(cookie.name, cookie.value, cookie);
       }
     }
-  } else {
+  } else if (isPrivate) {
     response.cookies.delete("accessToken");
     response.cookies.delete("refreshToken");
   }
